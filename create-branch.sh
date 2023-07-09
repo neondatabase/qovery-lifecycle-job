@@ -92,7 +92,7 @@ else
   },
     "db_url": {
     "sensitive": true,
-    "value": "postgres://$PGUSERNAME:'$PGPASSWORD'@'$endpoint_id'.'$region'.'$cloud_provider'.neon.tech"
+    "value": "postgres://'$PGUSERNAME':'$PGPASSWORD'@'$endpoint_id'.'$region'.'$cloud_provider'.neon.tech"
   },
     "db_url_with_pooler": {
     "sensitive": true,
