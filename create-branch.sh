@@ -7,7 +7,7 @@ branch=$(curl --silent \
   "https://console.neon.tech/api/v2/projects/'$PROJECT_ID'/branches" \
   --header "Accept: application/json" \
   --header "Content-Type: application/json" \
-  --header "Authorization: Bearer '$API_KEY'" \
+  --header "Authorization: Bearer '$NEON_API_KEY'" \
   --data "{
     \"branch\": {
       \"name\": \"'$QOVERY_ENVIRONMENT_NAME'\"
@@ -26,7 +26,7 @@ branch_id=$(curl --silent \
     "https://console.neon.tech/api/v2/projects/'$PROJECT_ID'/branches" \
     --header "Accept: application/json" \
     --header "Content-Type: application/json" \
-    --header "Authorization: Bearer '$API_KEY'" \
+    --header "Authorization: Bearer '$NEON_API_KEY'" \
     | jq -r .branches \
     | jq -c '.[] | select(.name | contains("'$QOVERY_ENVIRONMENT_NAME'")) .id' \
     | jq -r \
@@ -38,7 +38,7 @@ endpoints=$(curl --silent \
     "https://console.neon.tech/api/v2/projects/'$PROJECT_ID'/branches/'$branch_id'/endpoints" \
     --header "Accept: application/json" \
     --header "Content-Type: application/json" \
-    --header "Authorization: Bearer '$API_KEY'" \
+    --header "Authorization: Bearer '$NEON_API_KEY'" \
     ) \
 
 endpoint_id=$(echo $endpoints | jq --raw-output '.endpoints[0].host' | cut -d'.' -f1)
