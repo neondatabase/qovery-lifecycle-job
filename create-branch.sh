@@ -1,106 +1,61 @@
-#!/bin/sh
+#!/bin/bash
 
 # exit on error
-set -e
+set -e  
 
-branch=$(curl --silent \
-  "https://console.neon.tech/api/v2/projects/'$PROJECT_ID'/branches" \
-  --header "Accept: application/json" \
-  --header "Content-Type: application/json" \
-  --header "Authorization: Bearer '$NEON_API_KEY'" \
-  --data "{
-    \"branch\": {
-      \"name\": \"'$QOVERY_ENVIRONMENT_NAME'\"
-    },
-    \"endpoints\": [
-      {
-        \"type\": \"read_write\"
-      }
-    ]
-  }")
+yarn -s neonctl branches create \
+          --api-key $NEON_API_KEY \
+          --project.id $NEON_PROJECT_ID \
+          --branch.name $QOVERY_ENVIRONMENT_NAME \
+          --endpoint.type read_write -o json \
+          2> branch_err > branch_out || true
 
-if [[ $branch == *"already exists"* ]]; then
-
-# Get the branch id by its name. We list all branches and filter by name
-branch_id=$(curl --silent \
-    "https://console.neon.tech/api/v2/projects/'$PROJECT_ID'/branches" \
-    --header "Accept: application/json" \
-    --header "Content-Type: application/json" \
-    --header "Authorization: Bearer '$NEON_API_KEY'" \
-    | jq -r .branches \
-    | jq -c '.[] | select(.name | contains("'$QOVERY_ENVIRONMENT_NAME'")) .id' \
-    | jq -r \
-    ) \
+echo "branch create result:\n" >> debug.log
+cat branch_out >> debug.log
 
 
-# Get the list of endpoints for the branch by its id. 
-endpoints=$(curl --silent \
-    "https://console.neon.tech/api/v2/projects/'$PROJECT_ID'/branches/'$branch_id'/endpoints" \
-    --header "Accept: application/json" \
-    --header "Content-Type: application/json" \
-    --header "Authorization: Bearer '$NEON_API_KEY'" \
-    ) \
+if echo "$(cat branch_err)" | grep -q "already exists"; then
+  # Get the branch id by its name. We list all branches and filter by name
+  branch_id=$(yarn -s neonctl branches list --project.id $NEON_PROJECT_ID --api-key $NEON_API_KEY -o json \
+      | jq -c '.[] | select(.name | contains("'$QOVERY_ENVIRONMENT_NAME'")) .id' \
+      | jq -r)
 
-endpoint_id=$(echo $endpoints | jq --raw-output '.endpoints[0].host' | cut -d'.' -f1)
-region=$(echo $endpoints | jq --raw-output '.endpoints[0].host' | cut -d'.' -f2)
-cloud_provider=$(echo $endpoints | jq --raw-output '.endpoints[0].host' | cut -d'.' -f3)
-host=$(echo $endpoints | jq --raw-output '.endpoints[0].host')
-branch_id=$(echo $endpoints | jq --raw-output '.endpoints[0].branch_id')
+  echo "branch exists, branch id: ${branch_id}" >> debug.log
 
-echo '{
-  "host": {
-    "sensitive": true,
-    "value": "'$host'"
-  },
-  "endpoint_id": {
-    "sensitive": true,
-    "value": "'$endpoint_id'"
-  },
-    "branch_id": {
-    "sensitive": true,
-    "value": "'$branch_id'"
-  },
-    "db_url": {
-    "sensitive": true,
-    "value": "postgres://'$PGUSERNAME':'$PGPASSWORD'@'$endpoint_id'.'$region'.'$cloud_provider'.neon.tech"
-  },
-    "db_url_with_pooler": {
-    "sensitive": true,
-    "value": "postgres://'$PGUSERNAME':'$PGPASSWORD'@'$endpoint_id'-pooler.'$region'.'$cloud_provider'.neon.tech"
-  }
-}' > /qovery-output/qovery-output.json
-
-else
-  endpoint_id=$(echo $branch | jq --raw-output '.endpoints[0].host' | cut -d'.' -f1)
-  region=$(echo $branch | jq --raw-output '.endpoints[0].host' | cut -d'.' -f2)
-  cloud_provider=$(echo $branch | jq --raw-output '.endpoints[0].host' | cut -d'.' -f3)
-  host=$(echo $branch | jq --raw-output '.endpoints[0].host')
-  branch_id=$(echo $branch | jq --raw-output '.endpoints[0].branch_id')
+  branch_id=${branch_id}
+  db_url=$(yarn -s neonctl cs ${branch_id} --project.id $NEON_PROJECT_ID --role.name $PGUSERNAME --database.name $NEON_DATABASE_NAME --prisma $PRISMA --api-key $NEON_API_KEY)
+  db_url_with_pooler=$(yarn -s neonctl cs ${branch_id} --project.id $NEON_PROJECT_ID --role.name $PGUSERNAME --database.name $NEON_DATABASE_NAME --pooled --prisma $PRISMA --api-key $NEON_API_KEY)
 
   echo '{
-  "host": {
-    "sensitive": true,
-    "value": "'$host'"
-  },
-  "endpoint_id": {
-    "sensitive": true,
-    "value": "'$endpoint_id'"
-  },
-    "branch_id": {
-    "sensitive": true,
-    "value": "'$branch_id'"
-  },
-    "db_url": {
-    "sensitive": true,
-    "value": "postgres://'$PGUSERNAME':'$PGPASSWORD'@'$endpoint_id'.'$region'.'$cloud_provider'.neon.tech"
-  },
-    "db_url_with_pooler": {
-    "sensitive": true,
-    "value": "postgres://'$PGUSERNAME':'$PGPASSWORD'@'$endpoint_id'-pooler.'$region'.'$cloud_provider'.neon.tech"
-  }
-}' > /qovery-output/qovery-output.json
+      "db_url": {
+      "sensitive": true,
+      "value": "'$db_url'"
+    },
+      "db_url_with_pooler": {
+      "sensitive": true,
+      "value": "'$db_url_with_pooler'"
+    }
+  }' > /qovery-output/qovery-output.json
 
+else
+  branch_id=$(cat branch_out | jq --raw-output '.branch.id')
+
+  echo "branch doesn't exist, branch id: ${branch_id}" >> debug.log
+
+  branch_id=${branch_id}
+  db_url=$(yarn -s neonctl cs ${branch_id} --project.id $NEON_PROJECT_ID --role.name $PGUSERNAME --database.name $NEON_DATABASE_NAME --prisma $PRISMA --api-key $NEON_API_KEY) 
+  db_url_with_pooler=$(yarn -s neonctl cs ${branch_id} --project.id $NEON_PROJECT_ID --role.name $PGUSERNAME --database.name $NEON_DATABASE_NAME --pooled --prisma $PRISMA --api-key $NEON_API_KEY) 
+
+  echo '{
+      "db_url": {
+      "sensitive": true,
+      "value": "'$db_url'"
+    },
+      "db_url_with_pooler": {
+      "sensitive": true,
+      "value": "'$db_url_with_pooler'"
+    }
+  }' > /qovery-output/qovery-output.json
 fi
 
-
-echo "shell script executed successfully with output values - check out your Qovery environment variables :)"
+echo "Shell script executed successfully with output values - check out your Qovery environment variables :)"
