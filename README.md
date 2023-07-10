@@ -22,7 +22,7 @@ Then, fill in the following environment variables:
 
 - `NEON_API_KEY`: Your Neon API key. Check out the [Neon API documentation](https://neon.tech/docs/manage/api-keys#create-an-api-key) to learn how to generate one.
 - `PGUSERNAME`: is the database user
-- `PGPASSWORD`: is the database user
+- `NEON_DATABASE_NAME`: is the database name
 - `NEON_PROJECT_ID`: you can find it in your Neon project settings.
 - `QOVERY_ENVIRONMENT_NAME`: you won't need this when deploying the lifecycle job to Qovery. This is only for testing purposes.
 
