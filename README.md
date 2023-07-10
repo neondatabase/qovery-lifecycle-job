@@ -51,7 +51,7 @@ This command will run the `create-branch.sh` script:
 docker run shell-script create-branch.sh --env-file ./.env
 ```
 
-This command will run the `create-branch.sh` script:
+This command will run the `delete-branch.sh` script:
 
 ```bash
 docker run shell-script delete-branch.sh --env-file ./.env
