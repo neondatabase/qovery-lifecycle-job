@@ -27,11 +27,11 @@ if echo "$(cat branch_err)" | grep -q "already exists"; then
   db_url_with_pooler=$(yarn -s neonctl cs ${branch_id} --project.id $NEON_PROJECT_ID --role.name $PGUSERNAME --database.name $NEON_DATABASE_NAME --pooled --prisma $PRISMA --api-key $NEON_API_KEY)
 
   echo '{
-      "db_url": {
+      "DIRECT_DATABASE_URL": {
       "sensitive": true,
       "value": "'$db_url'"
     },
-      "db_url_with_pooler": {
+      "DATABASE_URL": {
       "sensitive": true,
       "value": "'$db_url_with_pooler'"
     }
