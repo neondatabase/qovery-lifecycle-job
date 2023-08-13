@@ -13,49 +13,22 @@ yarn -s neonctl branches create \
 echo "branch create result:\n" >> debug.log
 cat branch_out >> debug.log
 
+branch_id=$(cat branch_out | jq --raw-output '.branch.id')
+branch_id=${branch_id}
 
-if echo "$(cat branch_err)" | grep -q "already exists"; then
-  # Get the branch id by its name. We list all branches and filter by name
-  branch_id=$(yarn -s neonctl branches list --project.id $NEON_PROJECT_ID --api-key $NEON_API_KEY -o json \
-      | jq -c '.[] | select(.name | contains("'$QOVERY_ENVIRONMENT_NAME'")) .id' \
-      | jq -r)
+db_url=$(yarn -s neonctl cs ${branch_id} --project.id $NEON_PROJECT_ID --role.name $PGUSERNAME --database.name $NEON_DATABASE_NAME --api-key $NEON_API_KEY) 
+db_url_with_pooler=$(yarn -s neonctl cs ${branch_id} --project.id $NEON_PROJECT_ID --role.name $PGUSERNAME --database.name $NEON_DATABASE_NAME --pooled --api-key $NEON_API_KEY) 
 
-  echo "branch exists, branch id: ${branch_id}" >> debug.log
+echo '{
+    "DIRECT_DATABASE_URL": {
+    "sensitive": true,
+    "value": "'$db_url'"
+  },
+    "DATABASE_URL": {
+    "sensitive": true,
+    "value": "'$db_url_with_pooler'"
+  }
+}' > /qovery-output/qovery-output.json
 
-  branch_id=${branch_id}
-  db_url=$(yarn -s neonctl cs ${branch_id} --project.id $NEON_PROJECT_ID --role.name $PGUSERNAME --database.name $NEON_DATABASE_NAME --prisma $PRISMA --api-key $NEON_API_KEY)
-  db_url_with_pooler=$(yarn -s neonctl cs ${branch_id} --project.id $NEON_PROJECT_ID --role.name $PGUSERNAME --database.name $NEON_DATABASE_NAME --pooled --prisma $PRISMA --api-key $NEON_API_KEY)
-
-  echo '{
-      "DIRECT_DATABASE_URL": {
-      "sensitive": true,
-      "value": "'$db_url'"
-    },
-      "DATABASE_URL": {
-      "sensitive": true,
-      "value": "'$db_url_with_pooler'"
-    }
-  }' > /qovery-output/qovery-output.json
-
-else
-  branch_id=$(cat branch_out | jq --raw-output '.branch.id')
-
-  echo "branch doesn't exist, branch id: ${branch_id}" >> debug.log
-
-  branch_id=${branch_id}
-  db_url=$(yarn -s neonctl cs ${branch_id} --project.id $NEON_PROJECT_ID --role.name $PGUSERNAME --database.name $NEON_DATABASE_NAME --prisma $PRISMA --api-key $NEON_API_KEY) 
-  db_url_with_pooler=$(yarn -s neonctl cs ${branch_id} --project.id $NEON_PROJECT_ID --role.name $PGUSERNAME --database.name $NEON_DATABASE_NAME --pooled --prisma $PRISMA --api-key $NEON_API_KEY) 
-
-  echo '{
-      "DIRECT_DATABASE_URL": {
-      "sensitive": true,
-      "value": "'$db_url'"
-    },
-      "DATABASE_URL": {
-      "sensitive": true,
-      "value": "'$db_url_with_pooler'"
-    }
-  }' > /qovery-output/qovery-output.json
-fi
 
 echo "Shell script executed successfully with output values - check out your Qovery environment variables :)"
