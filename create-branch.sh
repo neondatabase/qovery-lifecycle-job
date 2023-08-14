@@ -18,6 +18,14 @@ branch_id=$(cat branch_out | jq --raw-output '.branch.id')
 db_url=$(yarn -s neonctl cs ${QOVERY_ENVIRONMENT_NAME} --project-id $NEON_PROJECT_ID --role-name $PGUSERNAME --database-name $NEON_DATABASE_NAME --api-key $NEON_API_KEY) 
 db_url_with_pooler=$(yarn -s neonctl cs ${QOVERY_ENVIRONMENT_NAME} --project-id $NEON_PROJECT_ID --role-name $PGUSERNAME --database-name $NEON_DATABASE_NAME --pooled --api-key $NEON_API_KEY) 
 
+IFS=':@/' read -ra parts <<< "${db_url#*//}"
+
+echo "User: ${parts[0]}"
+echo "Password: ${parts[1]}"
+echo "Host: ${parts[2]}"
+echo "Port: ${parts[3]}"
+echo "Database: ${parts[4]}"
+
 echo '{
     "DIRECT_DATABASE_URL": {
     "sensitive": true,
@@ -26,6 +34,10 @@ echo '{
     "DATABASE_URL": {
     "sensitive": true,
     "value": "'$db_url_with_pooler'"
+  },
+    "POSTGRES_HOST": {
+    "sensitive": false,
+    "value": "'${parts[2]}'"
   }
 }' > /qovery-output/qovery-output.json
 
