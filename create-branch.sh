@@ -18,13 +18,29 @@ branch_id=$(cat branch_out | jq --raw-output '.branch.id')
 db_url=$(yarn -s neonctl cs ${QOVERY_ENVIRONMENT_NAME} --project-id $NEON_PROJECT_ID --role-name $PGUSERNAME --database-name $NEON_DATABASE_NAME --api-key $NEON_API_KEY) 
 db_url_with_pooler=$(yarn -s neonctl cs ${QOVERY_ENVIRONMENT_NAME} --project-id $NEON_PROJECT_ID --role-name $PGUSERNAME --database-name $NEON_DATABASE_NAME --pooled --api-key $NEON_API_KEY) 
 
-IFS=':@/' read -ra parts <<< "${db_url#*//}"
+# Extracting the user
+user=${connection_string#*//}
+user=${user%%:*}
+echo "User: $user"
 
-echo "User: ${parts[0]}"
-echo "Password: ${parts[1]}"
-echo "Host: ${parts[2]}"
-echo "Port: ${parts[3]}"
-echo "Database: ${parts[4]}"
+# Extracting the password
+password=${connection_string#*:*}
+password=${password%%@*}
+echo "Password: ********"
+
+# Extracting the host
+host=${connection_string#*@}
+host=${host%%:*}
+echo "Host: $host"
+
+# Extracting the port
+port=${connection_string##*:}
+port=${port%%/*}
+echo "Port: $port"
+
+# Extracting the database
+database=${connection_string##*/}
+echo "Database: $database"
 
 echo '{
     "DIRECT_DATABASE_URL": {
@@ -37,7 +53,7 @@ echo '{
   },
     "POSTGRES_HOST": {
     "sensitive": false,
-    "value": "'${parts[2]}'"
+    "value": "'$host'"
   }
 }' > /qovery-output/qovery-output.json
 
