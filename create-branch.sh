@@ -54,6 +54,18 @@ echo '{
     "POSTGRES_HOST": {
     "sensitive": false,
     "value": "'$host'"
+  },
+    "POSTGRES_PORT": {
+    "sensitive": false,
+    "value": "'$port'"
+  },
+    "POSTGRES_USER": {
+    "sensitive": false,
+    "value": "'$user'"
+  },
+    "POSTGRES_PASSWORD": {
+    "sensitive": true,
+    "value": "'$password'"
   }
 }' > /qovery-output/qovery-output.json
 
