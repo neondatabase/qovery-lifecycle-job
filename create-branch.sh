@@ -14,7 +14,6 @@ echo "branch create result:\n" >> debug.log
 cat branch_out >> debug.log
 
 branch_id=$(cat branch_out | jq --raw-output '.branch.id')
-branch_id=${branch_id}
 
 db_url=$(yarn -s neonctl cs ${QOVERY_ENVIRONMENT_NAME} --project-id $NEON_PROJECT_ID --role-name $PGUSERNAME --database-name $NEON_DATABASE_NAME --api-key $NEON_API_KEY) 
 db_url_with_pooler=$(yarn -s neonctl cs ${QOVERY_ENVIRONMENT_NAME} --project-id $NEON_PROJECT_ID --role-name $PGUSERNAME --database-name $NEON_DATABASE_NAME --pooled --api-key $NEON_API_KEY) 
