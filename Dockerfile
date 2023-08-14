@@ -12,7 +12,7 @@ RUN curl -sS https://dl.yarnpkg.com/debian/pubkey.gpg | gpg --dearmor -o /usr/sh
 RUN echo "deb [signed-by=/usr/share/keyrings/yarnkey.gpg] https://dl.yarnpkg.com/debian stable main" | tee /etc/apt/sources.list.d/yarn.list
 RUN apt-get update && apt-get install -y yarn
 
-RUN yarn add global neonctl@v1.13.0
+RUN yarn add global neonctl@v1.20.0
 
 WORKDIR /app
 
