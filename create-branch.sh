@@ -33,11 +33,6 @@ host=${db_url#*@}
 host=${host%%:*}
 echo "Host: $host"
 
-# Extracting the port
-port=${db_url##*:}
-port=${port%%/*}
-echo "Port: $port"
-
 # Extracting the database
 database=${db_url##*/}
 echo "Database: $database"
@@ -57,7 +52,7 @@ echo '{
   },
     "POSTGRES_PORT": {
     "sensitive": false,
-    "value": "'$port'"
+    "value": "5432"
   },
     "POSTGRES_USER": {
     "sensitive": false,
