@@ -19,27 +19,27 @@ db_url=$(yarn -s neonctl cs ${QOVERY_ENVIRONMENT_NAME} --project-id $NEON_PROJEC
 db_url_with_pooler=$(yarn -s neonctl cs ${QOVERY_ENVIRONMENT_NAME} --project-id $NEON_PROJECT_ID --role-name $PGUSERNAME --database-name $NEON_DATABASE_NAME --pooled --api-key $NEON_API_KEY) 
 
 # Extracting the user
-user=${connection_string#*//}
+user=${db_url#*//}
 user=${user%%:*}
 echo "User: $user"
 
 # Extracting the password
-password=${connection_string#*:*}
+password=${db_url#*:*}
 password=${password%%@*}
 echo "Password: ********"
 
 # Extracting the host
-host=${connection_string#*@}
+host=${db_url#*@}
 host=${host%%:*}
 echo "Host: $host"
 
 # Extracting the port
-port=${connection_string##*:}
+port=${db_url##*:}
 port=${port%%/*}
 echo "Port: $port"
 
 # Extracting the database
-database=${connection_string##*/}
+database=${db_url##*/}
 echo "Database: $database"
 
 echo '{
