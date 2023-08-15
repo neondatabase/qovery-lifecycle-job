@@ -1,5 +1,6 @@
 FROM node:18-alpine
 
+RUN apk add jq
 RUN yarn add global neonctl@v1.20.0
 
 WORKDIR /app
