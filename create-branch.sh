@@ -18,23 +18,20 @@ branch_id=$(cat branch_out | jq --raw-output '.branch.id')
 db_url=$(yarn -s neonctl cs ${QOVERY_ENVIRONMENT_NAME} --project-id $NEON_PROJECT_ID --role-name $PGUSERNAME --database-name $NEON_DATABASE_NAME --api-key $NEON_API_KEY) 
 db_url_with_pooler=$(yarn -s neonctl cs ${QOVERY_ENVIRONMENT_NAME} --project-id $NEON_PROJECT_ID --role-name $PGUSERNAME --database-name $NEON_DATABASE_NAME --pooled --api-key $NEON_API_KEY) 
 
-# Extracting the user
-user=${db_url#*//}
-user=${user%%:*}
-echo "User: $user"
+# Extracting the username
+username=$(echo "$db_url" | awk -F"://|:" '{print $2}')
+echo "Username: $username"
 
 # Extracting the password
-password=${db_url#*:*}
-password=${password%%@*}
+password=$(echo "$db_url" | awk -F":" '{print $3}' | awk -F"@" '{print $1}')
 echo "Password: ********"
 
 # Extracting the host
-host=${db_url#*@}
-host=${host%%:*}
+host=$(echo "$db_url" | awk -F"@" '{print $2}' | awk -F"/" '{print $1}')
 echo "Host: $host"
 
 # Extracting the database
-database=${db_url##*/}
+database=$(echo "$db_url" | awk -F"/" '{print $NF}')
 echo "Database: $database"
 
 echo '{
@@ -56,7 +53,7 @@ echo '{
   },
     "POSTGRES_USER": {
     "sensitive": false,
-    "value": "'$user'"
+    "value": "'$username'"
   },
     "POSTGRES_PASSWORD": {
     "sensitive": true,
