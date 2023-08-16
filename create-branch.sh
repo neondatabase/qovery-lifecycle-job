@@ -6,7 +6,7 @@ set -e
 yarn -s neonctl branches create \
           --api-key $NEON_API_KEY \
           --project-id $NEON_PROJECT_ID \
-          --name $QOVERY_ENVIRONMENT_NAME \
+          --name "$QOVERY_ENVIRONMENT_NAME" \
           --compute --type read_write -o json \
           2> branch_err > branch_out || true
 
