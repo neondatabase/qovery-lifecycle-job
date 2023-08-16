@@ -20,7 +20,7 @@ sanitized_qovery_env_name="${sanitized_qovery_env_name//:/}"
 sanitized_qovery_env_name="${sanitized_qovery_env_name//\"/_}"
 sanitized_qovery_env_name="${sanitized_qovery_env_name//./_}"
 
-echo "$sanitized_qovery_env_name"
+echo "Sanitized environment name: $sanitized_qovery_env_name"
 
 yarn -s neonctl branches create \
           --api-key $NEON_API_KEY \
