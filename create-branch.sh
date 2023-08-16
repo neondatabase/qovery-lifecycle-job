@@ -3,8 +3,10 @@
 # exit on error
 set -e  
 
+qovery_env_name="$QOVERY_ENVIRONMENT_NAME"
+
 # Remove square brackets
-sanitized_qovery_env_name="${$QOVERY_ENVIRONMENT_NAME//[\[\]]/}"
+sanitized_qovery_env_name="${qovery_env_name//[\[\]]/}"
 
 # Replace spaces with underscores
 sanitized_qovery_env_name="${sanitized_qovery_env_name// /_}"
