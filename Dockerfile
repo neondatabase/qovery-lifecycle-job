@@ -1,17 +1,6 @@
-FROM ubuntu:latest
+FROM node:18-alpine
 
-# Install required dependencies
-RUN apt-get update && apt-get install -y curl gnupg2 jq grep
-
-# Install Node.js
-RUN curl -fsSL https://deb.nodesource.com/setup_18.x | bash -
-RUN apt-get install -y nodejs
-
-# Install yarn
-RUN curl -sS https://dl.yarnpkg.com/debian/pubkey.gpg | gpg --dearmor -o /usr/share/keyrings/yarnkey.gpg
-RUN echo "deb [signed-by=/usr/share/keyrings/yarnkey.gpg] https://dl.yarnpkg.com/debian stable main" | tee /etc/apt/sources.list.d/yarn.list
-RUN apt-get update && apt-get install -y yarn
-
+RUN apk add jq curl
 RUN yarn add global neonctl@v1.20.0
 
 WORKDIR /app
