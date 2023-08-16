@@ -13,9 +13,9 @@ sanitized_qovery_env_name="${qovery_env_name//[\[\]]/}"
 sanitized_qovery_env_name="${sanitized_qovery_env_name// /_}"
 
 # Remove special characters
-sanitized_qovery_env_name="${sanitized_qovery_env_name//-/}"
-sanitized_qovery_env_name="${sanitized_qovery_env_name//T/}"
-sanitized_qovery_env_name="${sanitized_qovery_env_name//:/}"
+sanitized_qovery_env_name="${sanitized_qovery_env_name//-/_}"
+sanitized_qovery_env_name="${sanitized_qovery_env_name//T/_}"
+sanitized_qovery_env_name="${sanitized_qovery_env_name//:/_}"
 
 # Replace " and . with _
 sanitized_qovery_env_name="${sanitized_qovery_env_name//\"/_}"
