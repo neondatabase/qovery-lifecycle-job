@@ -3,10 +3,27 @@
 # exit on error
 set -e  
 
+# Remove square brackets
+sanitized_qovery_env_name="${$QOVERY_ENVIRONMENT_NAME//[\[\]]/}"
+
+# Replace spaces with underscores
+sanitized_qovery_env_name="${sanitized_qovery_env_name// /_}"
+
+# Remove special characters
+sanitized_qovery_env_name="${sanitized_qovery_env_name//-/}"
+sanitized_qovery_env_name="${sanitized_qovery_env_name//T/}"
+sanitized_qovery_env_name="${sanitized_qovery_env_name//:/}"
+
+# Replace " and . with _
+sanitized_qovery_env_name="${sanitized_qovery_env_name//\"/_}"
+sanitized_qovery_env_name="${sanitized_qovery_env_name//./_}"
+
+echo "$sanitized_qovery_env_name"
+
 yarn -s neonctl branches create \
           --api-key $NEON_API_KEY \
           --project-id $NEON_PROJECT_ID \
-          --name "$QOVERY_ENVIRONMENT_NAME" \
+          --name "$sanitized_qovery_env_name" \
           --compute --type read_write -o json \
           2> branch_err > branch_out || true
 
@@ -15,8 +32,8 @@ cat branch_out >> debug.log
 
 branch_id=$(cat branch_out | jq --raw-output '.branch.id')
 
-db_url=$(yarn -s neonctl cs ${QOVERY_ENVIRONMENT_NAME} --project-id $NEON_PROJECT_ID --role-name $PGUSERNAME --database-name $NEON_DATABASE_NAME --api-key $NEON_API_KEY) 
-db_url_with_pooler=$(yarn -s neonctl cs ${QOVERY_ENVIRONMENT_NAME} --project-id $NEON_PROJECT_ID --role-name $PGUSERNAME --database-name $NEON_DATABASE_NAME --pooled --api-key $NEON_API_KEY) 
+db_url=$(yarn -s neonctl cs ${sanitized_qovery_env_name} --project-id $NEON_PROJECT_ID --role-name $PGUSERNAME --database-name $NEON_DATABASE_NAME --api-key $NEON_API_KEY) 
+db_url_with_pooler=$(yarn -s neonctl cs ${sanitized_qovery_env_name} --project-id $NEON_PROJECT_ID --role-name $PGUSERNAME --database-name $NEON_DATABASE_NAME --pooled --api-key $NEON_API_KEY) 
 
 # Extracting the username
 username=$(echo "$db_url" | awk -F"://|:" '{print $2}')
